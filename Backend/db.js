@@ -90,18 +90,27 @@ const DEFAULT_PROJECTS = [
     title: 'Website E-Commerce',
     description: 'Toko online sederhana dengan fitur keranjang belanja.',
     tech: ['Next.js', 'Express', 'MongoDB'],
+    image: 'https://picsum.photos/seed/ecommerce/1200/800',
+    demoUrl: 'https://example.com',
+    repoUrl: 'https://github.com/johndoe',
   },
   {
     id: 2,
     title: 'Aplikasi Todo List',
     description: 'Aplikasi pencatat tugas harian dengan autentikasi.',
     tech: ['React', 'Node.js', 'PostgreSQL'],
+    image: 'https://picsum.photos/seed/todoapp/1200/800',
+    demoUrl: 'https://example.com',
+    repoUrl: 'https://github.com/johndoe',
   },
   {
     id: 3,
     title: 'Landing Page Company',
     description: 'Landing page responsif untuk perusahaan startup.',
     tech: ['Next.js', 'Tailwind CSS'],
+    image: 'https://picsum.photos/seed/landingpage/1200/800',
+    demoUrl: 'https://example.com',
+    repoUrl: 'https://github.com/johndoe',
   },
 ];
 
@@ -113,6 +122,11 @@ async function seedIfEmpty() {
   await skillsCol().insertMany(DEFAULT_SKILLS.map(({ id, name, level }) => ({ key: 'main', id, name, level })));
   await projectsCol().insertMany(DEFAULT_PROJECTS.map((p) => ({ key: 'main', ...p })));
   await db.collection('meta').insertOne({ key: 'seeded', at: new Date() });
+
+  // ponytail: migrasi ringan — DB lama yang sudah di-seed tanpa field image/demo/repo diisi dari default
+  for (const p of DEFAULT_PROJECTS) {
+    await projectsCol().updateOne({ key: 'main', id: p.id, image: { $exists: false } }, { $set: { image: p.image, demoUrl: p.demoUrl, repoUrl: p.repoUrl } });
+  }
 }
 
 async function connectDb() {

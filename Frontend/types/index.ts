@@ -21,6 +21,9 @@ export interface Project {
   title: string;
   description: string;
   tech: string[];
+  image?: string;
+  demoUrl?: string;
+  repoUrl?: string;
 }
 
 export interface ContactForm {

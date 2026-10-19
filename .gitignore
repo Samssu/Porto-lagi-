@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env*.local
+
+# Logs
+*.log
+lint.log
+lintjson.log
+server.log
+
+# OpenCode
+.opencode/
+
+# Plan (tidak masuk GitHub)
+plan/
+
+# OS
+Thumbs.db
+.DS_Store

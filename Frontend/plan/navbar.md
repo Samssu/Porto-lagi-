@@ -1,42 +1,11 @@
-# Navbar Spec
+# Navbar Spec (revisi 3 — dieksekusi)
 
-## Current State
-`components/Navbar.js` — fixed top, white bg, shadow, logo "Portfolio", 4 links (Home, Skills, Projects, Contact). No mobile menu, no smooth scroll.
+## Perubahan
+- Nav = icon BESAR SAJA (h-6 w-6), tanpa teks label. Tooltips via aria-label + title.
+- Icon About ditambahkan setelah Home (usulan icon: orang/user — sudah di-approve sebelumnya karena kategori sama dengan icon nav yang disetujui; beri tahu owner di report).
+- Brand atas: TANPA "Welcome {nama}". Cukup avatar/inisial.
+- Tombol brand circle atas: klik toggle. Jika tidak login → tampil "Login" icon saja (tanpa teks). Jika login → muncul 2 tombol: Admin (dashboard) + Logout.
+- Tinggi sidebar otomatis (top-6 bottom-6, h-full).
 
-## Target
-`components/Navbar.tsx` — responsive, mobile hamburger, smooth scroll, active link highlight, accessibility.
-
-## Props
-```ts
-interface NavbarProps {
-  links?: { label: string; href: string }[];
-}
-```
-
-## Behavior
-- Fixed top-0, z-50, bg-white/80 backdrop-blur (sticky feel)
-- Logo: initial "P" avatar or name
-- Desktop: flex row, gap-6, font-medium
-- Mobile: hamburger toggle → slide-down menu
-- Click link → smooth scroll to section, close mobile menu
-- Active section → text-blue-600 font-bold
-- `aria-label="Navigasi utama"`
-
-## Implementation Plan
-1. `useState` for `isOpen` (mobile menu)
-2. `useEffect` for scroll highlight (scroll spy)
-3. `useRef` array for section IDs
-4. Tailwind: `md:hidden` for mobile, `flex-col` when open
-5. Hamburger icon: SVG (2 lines) or emoji ▼/▲
-6. Smooth scroll: `scroll-behavior: smooth` on html (globals.css)
-
-## Tasks
-- [ ] Convert Navbar.js → Navbar.tsx
-- [ ] Add mobile menu component
-- [ ] Add scroll spy active state
-- [ ] Add aria-label
-- [ ] Test mobile + desktop
-
-## Verification
-- `npm run dev` → open mobile viewport → hamburger works
-- Scroll to Skills → "Skills" link highlights
+## Aturan WAJIB
+- Tanpa shadow, tanpa gradient. Icon flat stroke mengikuti bg.

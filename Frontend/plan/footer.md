@@ -41,3 +41,9 @@ interface FooterProps {
 - `npm run dev` → Footer renders with profile
 - Backend down → Footer returns null, no crash
 - GitHub link → opens new tab with noopener
+
+## Aturan Tambahan (WAJIB)
+- TANPA shadow pada elemen apapun.
+- TANPA gradient pada teks/card/border.
+- TANPA icon di dalam kotak/bulatan rounded. Icon sosial hanya jika fungsional & disetujui owner dulu.
+- Revisi: footer sudah dieksekusi versi terang (border tipis, copyright + back to top). Tidak ada perubahan direncanakan; hanya ikut tema bila perlu.

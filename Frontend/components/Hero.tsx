@@ -4,25 +4,27 @@ export default function Hero({ profile }: { profile: Profile | null }) {
   if (!profile) return null;
 
   return (
-    <section id="home" className="min-h-screen bg-neutral-50">
-      <div className="md:pl-32 lg:pl-36">
-        <div className="mx-auto w-full max-w-5xl px-6 pb-16 pt-24 sm:px-10 lg:pt-28">
-          {/* Top Bar — tanpa teks welcome, hanya avatar */}
-          <div className="flex items-center justify-end gap-4 border-b border-neutral-200 pb-6">
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900 text-base font-semibold text-white"
-              aria-hidden="true"
-            >
-              {profile.name.charAt(0)}
-            </div>
-          </div>
+    <section id="home" className="relative min-h-screen bg-neutral-50">
+      {/* Background pemandangan (Unsplash) + overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=80)' }}
+        role="img"
+        aria-label="Latar pemandangan gunung"
+      />
+      <div className="absolute inset-0 bg-neutral-50/70 dark:bg-neutral-950/70" aria-hidden="true" />
 
-          {/* Main Content */}
-          <div className="pt-16 lg:pt-24">
+      <div className="relative">
+        {/* Mengubah px-6 menjadi pl-4 pr-12 (atau sesuaikan lg:pl-8) agar konten bergeser ke kiri */}
+        <div className="mx-auto flex w-full max-w-5xl flex-col justify-center pb-16 pt-32 pl-4 pr-12 sm:px-10 lg:pt-36 lg:pl-8 min-h-screen">
+         
+          {/* Main Content — semua rata kiri */}
+          <div className="text-left">
             <p className="mb-5 text-base font-semibold uppercase tracking-[0.25em] text-neutral-400">
               {profile.role}
             </p>
 
+            {/* Nama kini sedikit lebih ke kiri dari sebelumnya */}
             <h1 className="mb-10 text-7xl font-light leading-[1.0] tracking-tight text-neutral-900 sm:text-8xl lg:text-9xl">
               {profile.name}
             </h1>
@@ -49,7 +51,7 @@ export default function Hero({ profile }: { profile: Profile | null }) {
             </div>
 
             {/* Location + social — tanpa panah */}
-            <div className="mt-16 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-neutral-200 pt-8">
+            <div className="mt-16 flex flex-wrap items-center gap-x-8 gap-y-3 pt-8">
               <p className="text-base text-neutral-500">{profile.location}</p>
 
               {profile.social?.github && (

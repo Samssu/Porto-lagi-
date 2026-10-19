@@ -13,10 +13,9 @@ const links = [
   { label: 'Contact', href: '#contact' },
 ];
 
-/* Icon SVG inline (disetujui owner: rumah, chip, tas, amplop + user untuk About): flat stroke, warna ikut currentColor */
-function NavIcon({ name }: { name: string }) {
+function NavIcon({ name, className = 'h-7 w-7' }: { name: string; className?: string }) {
   const common = {
-    className: 'h-6 w-6',
+    className: className,
     fill: 'none',
     stroke: 'currentColor',
     strokeWidth: 1.8,
@@ -82,6 +81,18 @@ function NavIcon({ name }: { name: string }) {
           <path d="M21 12H10m0 0 3-3m-3 3 3 3" />
         </svg>
       );
+    case 'ArrowLeft':
+      return (
+        <svg {...common}>
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      );
+    case 'ArrowRight':
+      return (
+        <svg {...common}>
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -101,10 +112,26 @@ function useAuthUser(): AuthUser | null {
 }
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [active, setActive] = useState('home');
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [dark, setDark] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const user = useAuthUser();
+
+  const activeIndex = links.findIndex((l) => l.href.slice(1) === active);
+  const hoveredIndex = links.findIndex((l) => l.href.slice(1) === hovered);
+  const barIndex = hoveredIndex !== -1 ? hoveredIndex : activeIndex;
+
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains('dark'));
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle('dark', next);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -124,167 +151,151 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Sidebar vertikal — desktop */}
+      {/* Tombol Toggle khusus Mobile (Di Tengah Kiri Layar) */}
+      <button
+        type="button"
+        onClick={() => setIsMobileOpen((v) => !v)}
+        className="fixed left-4 top-1/2 -translate-y-1/2 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-lg transition-transform hover:scale-105 md:hidden"
+        aria-label={isMobileOpen ? 'Tutup navigasi' : 'Buka navigasi'}
+      >
+        <NavIcon name={isMobileOpen ? 'ArrowLeft' : 'ArrowRight'} className="h-7 w-7" />
+      </button>
+
+      {/* Sidebar Vertikal (Diperbesar & Digeser ke Kanan) */}
       <nav
-        className="fixed left-6 top-6 bottom-6 z-50 hidden md:flex w-20 flex-col items-center gap-5 rounded-3xl border border-neutral-200 bg-white py-6"
+        className={`fixed left-12 top-1/2 z-50 flex w-20 -translate-y-1/2 flex-col items-center gap-5 rounded-[2rem] border border-neutral-200 bg-white py-8 shadow-sm transition-transform duration-300 ease-in-out dark:border-neutral-800 dark:bg-neutral-900 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-[200%] md:translate-x-0'
+        }`}
         aria-label="Main navigation"
       >
-        {/* Brand circle — klik toggle menu admin/logout; tanpa teks Welcome */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-900 text-sm font-bold text-white transition-colors hover:bg-neutral-700"
-            aria-label={menuOpen ? 'Tutup menu akun' : 'Buka menu akun'}
-            aria-expanded={menuOpen}
-          >
-            {user ? user.name.charAt(0).toUpperCase() : 'P'}
-          </button>
+        {/* Foto Profil Bulat di Atas (Hanya Muncul Jika Sudah Login) */}
+        {user && (
+          <div className="relative mb-2">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-neutral-200 border-2 border-white shadow-sm transition-transform hover:scale-105 dark:border-neutral-700"
+              aria-label="Pengaturan Akun"
+              title="Pengaturan"
+            >
+              {user.avatar ? (
+                <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-lg font-bold text-neutral-600 dark:text-neutral-300">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </button>
 
-          {/* Popup kecil: icon-only. Tidak login → Login saja; login → Admin + Logout */}
-          {menuOpen && (
-            <div className="absolute left-12 top-0 flex flex-col gap-1 rounded-2xl border border-neutral-200 bg-white p-2">
-              {!user && (
-                <Link
-                  href="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
-                  aria-label="Login"
-                  title="Login"
+            {/* Dropdown Menu Pengaturan dari Foto Profil */}
+            {menuOpen && (
+              <div className="absolute top-0 left-16 flex flex-col gap-1 rounded-2xl border border-neutral-200 bg-white p-2 shadow-md dark:border-neutral-800 dark:bg-neutral-900">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  aria-label={dark ? 'Aktifkan light mode' : 'Aktifkan dark mode'}
+                  title={dark ? 'Light mode' : 'Dark mode'}
                 >
-                  <NavIcon name="Login" />
+                  {dark ? (
+                    <svg {...{ className: 'h-6 w-6', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, viewBox: '0 0 24 24', 'aria-hidden': true }}>
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4" />
+                    </svg>
+                  ) : (
+                    <svg {...{ className: 'h-6 w-6', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, viewBox: '0 0 24 24', 'aria-hidden': true }}>
+                      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+                    </svg>
+                  )}
+                </button>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+                  aria-label="Dashboard admin"
+                  title="Admin"
+                >
+                  <NavIcon name="Admin" className="h-6 w-6" />
                 </Link>
-              )}
-              {user && (
-                <>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
-                    aria-label="Dashboard admin"
-                    title="Admin"
-                  >
-                    <NavIcon name="Admin" />
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      logout();
-                      setMenuOpen(false);
-                    }}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
-                    aria-label="Logout"
-                    title="Logout"
-                  >
-                    <NavIcon name="Logout" />
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    setMenuOpen(false);
+                  }}
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+                  aria-label="Logout"
+                  title="Logout"
+                >
+                  <NavIcon name="Logout" className="h-6 w-6" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
-        <ul className="flex flex-col items-center gap-2">
+        <ul
+          className="relative flex flex-col items-center gap-3"
+          onMouseLeave={() => setHovered(null)}
+        >
+          {/* Bar Hitam Animasi (Disesuaikan untuk ukuran ikon h-14 w-14 dengan gap-3) */}
+          <span
+            className="absolute -left-1 top-3 h-14 w-0.5 rounded-full bg-neutral-900 transition-all duration-300 ease-in-out dark:bg-white"
+            style={{
+              transform: `translateY(${barIndex * 4.25}rem)`, // 3.5rem (tinggi) + 0.75rem (gap) = 4.25rem
+              opacity: barIndex !== -1 ? 1 : 0,
+            }}
+            aria-hidden="true"
+          />
+
           {links.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
                 aria-label={link.label}
                 title={link.label}
+                onMouseEnter={() => setHovered(link.href.slice(1))}
+                onClick={() => {
+                  setActive(link.href.slice(1));
+                  setHovered(null);
+                  setIsMobileOpen(false);
+                }}
                 aria-current={active === link.href.slice(1) ? 'page' : undefined}
-                className={`relative flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${
+                className={`relative flex h-14 w-14 items-center justify-center rounded-2xl transition-colors ${
                   active === link.href.slice(1)
-                    ? 'text-neutral-900 bg-neutral-100'
-                    : 'text-neutral-400 hover:text-neutral-900'
+                    ? 'text-neutral-900 bg-neutral-100 dark:text-white dark:bg-neutral-800'
+                    : 'text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
                 }`}
               >
-                {active === link.href.slice(1) && (
-                  <span
-                    className="absolute -left-3 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-neutral-900"
-                    aria-hidden="true"
-                  />
-                )}
-                <NavIcon name={link.label} />
+                <NavIcon name={link.label} className="h-7 w-7" />
               </a>
             </li>
           ))}
         </ul>
+
+        {/* Bagian Bawah: Tombol Login (Hanya Muncul Jika Belum Login) */}
+        {!user && (
+          <div className="mt-auto flex flex-col items-center pt-6 border-t border-neutral-100 dark:border-neutral-800 w-14">
+            <Link
+              href="/login"
+              title="Login"
+              aria-label="Login"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-md transition-all hover:bg-neutral-700 hover:scale-105"
+            >
+              <NavIcon name="Login" className="h-6 w-6" />
+            </Link>
+          </div>
+        )}
       </nav>
 
-      {/* Topbar + menu mobile */}
-      <div className="fixed top-0 w-full z-50 md:hidden border-b border-neutral-200 bg-white">
-        <div className="flex items-center justify-between px-6 py-4">
-          <a href="#home" className="text-lg font-bold text-neutral-900">
-            Porto<span className="text-neutral-400">folio</span>
-          </a>
-
-          <button
-            type="button"
-            className="p-2 text-neutral-700"
-            aria-label={open ? 'Tutup menu' : 'Buka menu'}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? '✕' : '☰'}
-          </button>
-        </div>
-
-        {open && (
-          <ul className="border-t border-neutral-200 px-6 py-4 space-y-1 bg-white">
-            {links.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium ${
-                    active === link.href.slice(1)
-                      ? 'text-neutral-900 bg-neutral-100'
-                      : 'text-neutral-500'
-                  }`}
-                >
-                  <NavIcon name={link.label} />
-                  {link.label}
-                </a>
-              </li>
-            ))}
-            {user ? (
-              <>
-                <li>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-3 text-sm font-medium text-neutral-900"
-                  >
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      logout();
-                      setOpen(false);
-                    }}
-                    className="block w-full text-left rounded-lg px-3 py-3 text-sm font-medium text-neutral-500"
-                  >
-                    Logout
-                  </button>
-                </li>
-              </>
-            ) : (
-              <li>
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className="mt-2 block rounded-full bg-neutral-900 px-4 py-3 text-center text-sm font-semibold text-white"
-                >
-                  Login
-                </Link>
-              </li>
-            )}
-          </ul>
-        )}
-      </div>
+      {/* Overlay Mobile saat Sidebar Terbuka */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
+          onClick={() => setIsMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </>
   );
 }

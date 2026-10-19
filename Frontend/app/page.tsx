@@ -72,7 +72,7 @@ export default function Home() {
         </section>
       ) : (
         <>
-          <div className="pt-20"></div>
+        
           <Hero profile={profile} />
           <About profile={profile} />
           <Skills skills={skills} />
